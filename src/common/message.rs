@@ -203,23 +203,23 @@ where
         members.push(self.print_deserialize(ctx));
         members.push(self.print_serialize(ctx, runtime));
 
-        let to_json_class_member = self.print_to_json(ctx);
-        for class_member in to_json_class_member {
-            members.push(
-                runtime
-                    .to_json(ctx, self)
-                    .unwrap_or_else(|| class_member),
-            );
-        }
+        // let to_json_class_member = self.print_to_json(ctx);
+        // for class_member in to_json_class_member {
+        //     members.push(
+        //         runtime
+        //             .to_json(ctx, self)
+        //             .unwrap_or_else(|| class_member),
+        //     );
+        // }
         
-        let from_json_class_members = self.print_from_json(ctx);
-        for class_member in from_json_class_members {
-            members.push(
-                runtime
-                    .from_json(ctx, self)
-                    .unwrap_or_else(|| class_member),
-            );
-        }
+        // let from_json_class_members = self.print_from_json(ctx);
+        // for class_member in from_json_class_members {
+        //     members.push(
+        //         runtime
+        //             .from_json(ctx, self)
+        //             .unwrap_or_else(|| class_member),
+        //     );
+        // }
     
         let mut decorators = Vec::new();
         if ctx.options.with_sendable {
