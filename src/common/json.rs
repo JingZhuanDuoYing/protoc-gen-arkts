@@ -6,20 +6,18 @@
   * SPDX-License-Identifier: MIT 
  */
 
-use std::fmt::{format, Display, LowerExp};
+use std::fmt::{Display, LowerExp};
 use std::vec;
 
 use crate::context::Syntax;
 use crate::descriptor::field_descriptor_proto::Type;
-use crate::descriptor::{DescriptorProto, FileDescriptorProto};
+use crate::descriptor::DescriptorProto;
 use crate::{context::Context, descriptor::FieldDescriptorProto};
 
 use super::field::FieldAccessorFn;
-use convert_case::{Case, Casing};
-use protobuf::well_known_types::struct_::value;
 use swc_common::DUMMY_SP;
 use swc_ecma_ast::{
-    ArrayLit, ArrayPat, BinaryOp, BlockStmt, ClassMember, ClassMethod, Expr, Function, MethodKind, ObjectLit, Param, Pat, PatOrExpr, PropName, Stmt, TsType, UnaryOp, TsNonNullExpr
+    BinaryOp, BlockStmt, ClassMember, ClassMethod, Expr, Function, MethodKind, Param, PatOrExpr, PropName, Stmt, UnaryOp, TsNonNullExpr
 };
 use swc_ecma_utils::{quote_ident, quote_str};
 

@@ -13,7 +13,7 @@ use crate::{context::Context, descriptor};
 use std::vec;
 use swc_common::DUMMY_SP;
 use swc_ecma_ast::{
-    BindingIdent, BlockStmt, Expr, ForHead, ForOfStmt, Stmt, TsNonNullExpr, VarDecl,
+    BlockStmt, Expr, ForHead, ForOfStmt, Stmt, TsNonNullExpr,
 };
 use swc_ecma_utils::quote_ident;
 

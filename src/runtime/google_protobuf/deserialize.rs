@@ -14,8 +14,7 @@ use crate::{context::Context, descriptor};
 use std::vec;
 use swc_common::DUMMY_SP;
 use swc_ecma_ast::{
-    AssignOp, BinaryOp, BlockStmt, BreakStmt, Expr, KeyValueProp, ObjectLit, PatOrExpr, Prop,
-    PropName, PropOrSpread, Stmt, SwitchCase, SwitchStmt, ThrowStmt, TsNonNullExpr, WhileStmt,
+    AssignOp, BinaryOp, BlockStmt, BreakStmt, Expr, PatOrExpr, Stmt, SwitchCase, SwitchStmt, ThrowStmt, TsNonNullExpr, WhileStmt,
 };
 use swc_ecma_utils::{quote_ident, quote_str};
 

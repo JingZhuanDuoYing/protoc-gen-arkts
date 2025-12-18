@@ -5,13 +5,13 @@ use std::{
     path::PathBuf,
     str::FromStr,
     sync::{
-        atomic::{AtomicU64, Ordering},
+        atomic::AtomicU64,
         Arc, Mutex,
     },
 };
 use swc_common::DUMMY_SP;
 use swc_ecma_ast::{
-    Ident, ImportDecl, ImportSpecifier, ImportStarAsSpecifier, ImportNamedSpecifier, ModuleDecl, ModuleItem, Str,
+    Ident, ImportDecl, ImportSpecifier, ImportNamedSpecifier, ModuleDecl, ModuleItem, Str,
 };
 use swc_ecma_utils::quote_ident;
 

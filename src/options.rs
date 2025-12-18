@@ -29,7 +29,7 @@ impl Options {
         let mut grpc_web_package = "grpc-web";
         let mut runtime_package = "google-protobuf";
         let mut base64_package = "js-base64";
-        let mut sendable_package = "@kit.ArkTS";
+        let sendable_package = "@kit.ArkTS";
         let mut unary_rpc_promise = false;
         let mut namespaces = false;
         let mut import_suffix = "";
