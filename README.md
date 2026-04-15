@@ -18,6 +18,14 @@ Compile `.proto` files to plain arkTs.
 - Supports binary encoding (`toBinary`, `fromBinary`)
 - Supports Sendable
 
+## Installation
+
+You can install the latest pre-built binary for your platform (macOS, Linux, Windows) with a single command:
+
+```bash
+curl -sL https://raw.githubusercontent.com/JingZhuanDuoYing/protoc-gen-arkts/main/install.sh | bash
+```
+
 ## Usage
 
 ### Protoc
