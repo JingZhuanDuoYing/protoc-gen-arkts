@@ -30,8 +30,16 @@ curl -sL https://raw.githubusercontent.com/JingZhuanDuoYing/protoc-gen-arkts/mai
 
 ### Protoc
 
-```properties
-protoc -I $proto_path --arkts_out=$output_path gen.proto  --plugin=target/debug/protoc-gen-arkts
+Once installed, you can use the plugin directly:
+
+```bash
+protoc -I $proto_path --arkts_out=$output_path gen.proto
+```
+
+Or if you are building from source and want to use the local binary:
+
+```bash
+protoc -I $proto_path --arkts_out=$output_path gen.proto --plugin=path/to/protoc-gen-arkts
 ```
 
 
