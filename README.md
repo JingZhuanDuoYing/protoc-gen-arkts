@@ -14,7 +14,6 @@ Compile `.proto` files to plain arkTs.
 
 ## Features
 
-- Supports json encoding (`toJson`, `fromJson`)
 - Supports binary encoding (`toBinary`, `fromBinary`)
 - Supports Sendable
 
@@ -127,18 +126,11 @@ message Struct2 {
       struct_impl.field_map_i64_string.set(BigInt(i), i.toString())
     }
 
-    // const binarybuf: ArrayBuffer = struct_impl.toBinary()
-    // const new_struct_pkg_struct = struct_pkg_Struct.fromBinary(new Uint8Array(binarybuf))
-
-    // to json & from from
-    const new_to_json_obj = struct_impl.toJson();
-    const new_from_json_struct = struct_pkg_Struct.fromJson(new_to_json_obj)
-
     // to binary & from binary
     const new_to_binary_buf = struct_impl.toBinary()
     const new_from_binary_struct = struct_pkg_Struct.fromBinary(new_to_binary_buf)
 
-```
+    ```
 
 ## Development
 
