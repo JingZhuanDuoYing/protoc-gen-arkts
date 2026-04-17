@@ -66,18 +66,14 @@ impl DescriptorProto {
         let mut statements = vec![];
 
         statements.extend(runtime.to_binary(ctx, &self));
-        statements.push(crate::return_stmt!(crate::call_expr!(crate::member_expr!(
-            "bw",
-            "getResultBuffer"
-        ))));
 
         ClassMember::Method(ClassMethod {
             span: DUMMY_SP,
             accessibility: None,
-            key: PropName::Ident(quote_ident!("toBinary")),
+            key: PropName::Ident(quote_ident!("serializeInternal")),
             is_abstract: false,
             is_optional: false,
-            is_override: false,
+            is_override: true,
             is_static: false,
             function: Box::new(Function {
                 body: Some(BlockStmt {
@@ -87,8 +83,12 @@ impl DescriptorProto {
                 decorators: vec![],
                 is_async: false,
                 is_generator: false,
-                params: vec![],
-                return_type: Some(Box::new(crate::type_annotation!("Uint8Array"))),
+                params: vec![Param {
+                    span: DUMMY_SP,
+                    decorators: vec![],
+                    pat: crate::pat_ident!(quote_ident!("bw"), crate::type_annotation!("BinaryWriter")),
+                }],
+                return_type: None,
                 span: DUMMY_SP,
                 type_params: None,
             }),
@@ -185,6 +185,8 @@ where
             return vec![];
         }
 
+        ctx.get_protobuf_import(&ctx.options.runtime_package);
+
         let mut members: Vec<ClassMember> = Vec::new();
 
         members.push(self.print_message_type(ctx));
@@ -203,24 +205,6 @@ where
         members.push(self.print_deserialize(ctx));
         members.push(self.print_serialize(ctx, runtime));
 
-        // let to_json_class_member = self.print_to_json(ctx);
-        // for class_member in to_json_class_member {
-        //     members.push(
-        //         runtime
-        //             .to_json(ctx, self)
-        //             .unwrap_or_else(|| class_member),
-        //     );
-        // }
-        
-        // let from_json_class_members = self.print_from_json(ctx);
-        // for class_member in from_json_class_members {
-        //     members.push(
-        //         runtime
-        //             .from_json(ctx, self)
-        //             .unwrap_or_else(|| class_member),
-        //     );
-        // }
-    
         let mut decorators = Vec::new();
         if ctx.options.with_sendable {
             let sendable_decorator = Decorator {
@@ -240,7 +224,7 @@ where
                 implements: vec![],
                 is_abstract: false,
                 type_params: None,
-                super_class: None,
+                super_class: Some(Box::new(Expr::Ident(quote_ident!("Message")))),
                 super_type_params: None,
             }),
         };

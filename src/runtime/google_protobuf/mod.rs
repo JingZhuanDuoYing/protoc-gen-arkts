@@ -31,7 +31,7 @@ impl Runtime for GooglePBRuntime {
         ctx: &mut Context,
         descriptor: &descriptor::DescriptorProto,
     ) -> Vec<Stmt> {
-        self.serialize_setup_inner(ctx, descriptor, field::this_field_member, true, true)
+        self.serialize_setup_inner(ctx, descriptor, field::this_field_member, false, true)
     }
 }
 

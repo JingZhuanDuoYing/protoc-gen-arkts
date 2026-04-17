@@ -208,7 +208,7 @@ impl<'a> Context<'a> {
     }
 
     pub fn get_protobuf_import(&self, source: &str) {
-        let name: Ident = quote_ident!("BinaryReader, BinaryWriter");
+        let name: Ident = quote_ident!("BinaryReader, BinaryWriter, Message");
 
         if !self.import_identifier_map.contains_key(&String::from(source)) {
             let decl = ImportDecl {
