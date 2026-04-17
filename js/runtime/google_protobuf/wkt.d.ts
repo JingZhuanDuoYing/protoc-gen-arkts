@@ -9,43 +9,39 @@ declare const $type_registry$: {
 
 
 // message
-declare abstract class Message<JsonRepr> {
+declare abstract class Message {
     static type: string;
-    toJson(): JsonRepr;
     toBinary(): Uint8Array;
-    static fromJson(v: unknown): Message<unknown>;
-    static fromBinary(v: Uint8Array): Message<unknown>;
+    static fromBinary(v: Uint8Array): Message;
 }
 
-declare function $wkt_Message<JsonRepr>(): {
+declare function $wkt_Message(): {
     new (): {
-        toJson(): JsonRepr;
     };
-    fromJson(v: JsonRepr): typeof this;
 };
 
 
 // field_mask.ts
-declare class $wkt_google_protobuf_FieldMask extends $wkt_Message<string>() {
+declare class $wkt_google_protobuf_FieldMask extends $wkt_Message() {
     paths: string[];
 }
 
 // any.ts
-declare class $wkt_google_protobuf_Any extends $wkt_Message<object>() {
+declare class $wkt_google_protobuf_Any extends $wkt_Message() {
     type_url: string;
     value: Uint8Array;
 }
 
 
 // duration.ts
-declare class $wkt_google_protobuf_Duration extends $wkt_Message<string>() {
+declare class $wkt_google_protobuf_Duration extends $wkt_Message() {
     seconds: bigint;
     nanos: number;
 }
 
 
 // timestamp.ts
-declare class $wkt_google_protobuf_Timestamp extends $wkt_Message<string>() {
+declare class $wkt_google_protobuf_Timestamp extends $wkt_Message() {
     seconds: bigint;
     nanos: number;
 }
@@ -56,11 +52,11 @@ declare enum $wkt_google_protobuf_NullValue {
     NULL_VALUE = 0,
 }
 
-declare class $wkt_google_protobuf_Struct extends $wkt_Message<object>() {
+declare class $wkt_google_protobuf_Struct extends $wkt_Message() {
     fields: Map<string, $wkt_google_protobuf_Value>;
 }
 
-declare class $wkt_google_protobuf_Value extends $wkt_Message<unknown>() {
+declare class $wkt_google_protobuf_Value extends $wkt_Message() {
     null_value: $wkt_google_protobuf_NullValue;
     number_value: number;
     string_value: string;
@@ -69,28 +65,23 @@ declare class $wkt_google_protobuf_Value extends $wkt_Message<unknown>() {
     list_value: $wkt_google_protobuf_ListValue;
 }
 
-declare class $wkt_google_protobuf_ListValue extends $wkt_Message<Array<unknown>>() {
+declare class $wkt_google_protobuf_ListValue extends $wkt_Message() {
     values: $wkt_google_protobuf_Value[];
 }
 
 
 // wrappers.ts
-declare function $wkt_Value<WireType, JsonRepr, JsonValue>(): {
+declare function $wkt_Value<WireType>(): {
     new (): {
         value: WireType;
-        toJson(): JsonRepr;
-    };
-    fromJson(v: JsonValue): {
-        value: WireType;
-        toJson(): JsonRepr;
     };
 };
-declare class $wkt_google_protobuf_DoubleValue extends $wkt_Value<number, number, number>() {}
-declare class $wkt_google_protobuf_FloatValue extends $wkt_Value<number, number, number>() {}
-declare class $wkt_google_protobuf_Int64Value extends $wkt_Value<bigint, string, string>() {}
-declare class $wkt_google_protobuf_UInt64Value extends $wkt_Value<bigint, string, string>() {}
-declare class $wkt_google_protobuf_Int32Value extends $wkt_Value<number, number, number>() {}
-declare class $wkt_google_protobuf_UInt32Value extends $wkt_Value<number, number, number>() {}
-declare class $wkt_google_protobuf_BoolValue extends $wkt_Value<boolean, boolean, boolean>() {}
-declare class $wkt_google_protobuf_StringValue extends $wkt_Value<string, string, string>() {}
-declare class $wkt_google_protobuf_BytesValue extends $wkt_Value<Uint8Array, string, string>() {}
+declare class $wkt_google_protobuf_DoubleValue extends $wkt_Value<number>() {}
+declare class $wkt_google_protobuf_FloatValue extends $wkt_Value<number>() {}
+declare class $wkt_google_protobuf_Int64Value extends $wkt_Value<bigint>() {}
+declare class $wkt_google_protobuf_UInt64Value extends $wkt_Value<bigint>() {}
+declare class $wkt_google_protobuf_Int32Value extends $wkt_Value<number>() {}
+declare class $wkt_google_protobuf_UInt32Value extends $wkt_Value<number>() {}
+declare class $wkt_google_protobuf_BoolValue extends $wkt_Value<boolean>() {}
+declare class $wkt_google_protobuf_StringValue extends $wkt_Value<string>() {}
+declare class $wkt_google_protobuf_BytesValue extends $wkt_Value<Uint8Array>() {}
