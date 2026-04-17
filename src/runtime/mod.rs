@@ -5,10 +5,6 @@ pub trait Runtime {
     // binary
     fn from_binary(&self, ctx: &mut Context, descriptor: &DescriptorProto) -> Vec<Stmt>;
     fn to_binary(&self, ctx: &mut Context, descriptor: &DescriptorProto) -> Vec<Stmt>;
-
-    // json for well known types
-    fn from_json(&self, ctx: &mut Context, descriptor: &DescriptorProto) -> Option<ClassMember>;
-    fn to_json(&self, ctx: &mut Context, descriptor: &DescriptorProto) -> Option<ClassMember>;
 }
 
 pub trait GrpcRuntime {

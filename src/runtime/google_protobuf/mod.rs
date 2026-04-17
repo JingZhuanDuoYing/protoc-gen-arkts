@@ -13,7 +13,6 @@ use crate::{
     runtime::Runtime,
 };
 use swc_ecma_ast::Stmt;
-use swc_ecma_visit::VisitMutWith;
 
 #[derive(Clone)]
 pub struct GooglePBRuntime {}
@@ -33,50 +32,6 @@ impl Runtime for GooglePBRuntime {
         descriptor: &descriptor::DescriptorProto,
     ) -> Vec<Stmt> {
         self.serialize_setup_inner(ctx, descriptor, field::this_field_member, true, true)
-    }
-
-    fn from_json<'a>(
-        &self,
-        ctx: &mut Context,
-        descriptor: &descriptor::DescriptorProto,
-    ) -> Option<swc_ecma_ast::ClassMember> {
-        if descriptor.is_well_known(ctx) {
-            let type_name = ctx.calculate_type_name(descriptor.name());
-            let proto = ctx
-                .find_type_provider(&type_name)
-                .expect("expected to find a proto file for the type");
-            let member = well_known::get_member(proto.as_str(), descriptor.name(), "from_json");
-
-            if member.is_some() {
-                let mut member = member.unwrap();
-                let mut visit = well_known::LazyTypeRefWkt { ctx };
-                member.visit_mut_with(&mut visit);
-                return Some(member);
-            }
-        }
-        None
-    }
-
-    fn to_json(
-        &self,
-        ctx: &mut Context,
-        descriptor: &descriptor::DescriptorProto,
-    ) -> Option<swc_ecma_ast::ClassMember> {
-        if descriptor.is_well_known(ctx) {
-            let type_name = ctx.calculate_type_name(descriptor.name());
-            let proto = ctx
-                .find_type_provider(&type_name)
-                .expect("expected to find a proto file for the type");
-            let member = well_known::get_member(proto.as_str(), descriptor.name(), "to_json");
-
-            if member.is_some() {
-                let mut member = member.unwrap();
-                let mut visit = well_known::LazyTypeRefWkt { ctx };
-                member.visit_mut_with(&mut visit);
-                return Some(member);
-            }
-        }
-        None
     }
 }
 
