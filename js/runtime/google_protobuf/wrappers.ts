@@ -1,98 +1,28 @@
-class DoubleValue extends $wkt_google_protobuf_DoubleValue {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_DoubleValue();
-    m.value = Number(json);
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+import { Message } from "./message";
+
+export class DoubleValue extends Message {
 }
 
-class FloatValue extends $wkt_google_protobuf_FloatValue {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_FloatValue();
-    m.value = json;
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+export class FloatValue extends Message {
 }
 
-class Int64Value extends $wkt_google_protobuf_Int64Value {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_Int64Value();
-    m.value = BigInt(json);
-    return m;
-  }
-  toJson() {
-    return this.value.toString();
-  }
+export class Int64Value extends Message {
 }
 
-class UInt64Value extends $wkt_google_protobuf_UInt64Value {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_UInt64Value();
-    m.value = BigInt(json);
-    return m;
-  }
-  toJson() {
-    return this.value.toString();
-  }
+export class UInt64Value extends Message {
 }
 
-class Int32Value extends $wkt_google_protobuf_Int32Value {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_Int32Value();
-    m.value = json;
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+export class Int32Value extends Message {
 }
 
-class UInt32Value extends $wkt_google_protobuf_UInt32Value {
-  static fromJson(json: number) {
-    const m = new $wkt_google_protobuf_UInt32Value();
-    m.value = json;
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+export class UInt32Value extends Message {
 }
 
-class BoolValue extends $wkt_google_protobuf_BoolValue {
-  static fromJson(json) {
-    const m = new $wkt_google_protobuf_BoolValue();
-    m.value = json;
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+export class BoolValue extends Message {
 }
 
-class StringValue extends $wkt_google_protobuf_StringValue {
-  static fromJson(json: string) {
-    const m = new $wkt_google_protobuf_StringValue();
-    m.value = json;
-    return m;
-  }
-  toJson() {
-    return this.value;
-  }
+export class StringValue extends Message {
 }
 
-class BytesValue extends $wkt_google_protobuf_BytesValue {
-  static fromJson(json: string) {
-    const m = new $wkt_google_protobuf_BytesValue();
-    m.value = $base64$.decode(json);
-    return m;
-  }
-  toJson() {
-    return $base64$.encode(this.value);
-  }
+export class BytesValue extends Message {
 }
