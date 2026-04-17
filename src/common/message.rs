@@ -149,7 +149,7 @@ impl DescriptorProto {
             key: PropName::Ident(quote_ident!("mergeFrom")),
             is_abstract: false,
             is_optional: false,
-            is_override: false,
+            is_override: true,
             is_static: false,
             function: Box::new(Function {
                 body: Some(BlockStmt {

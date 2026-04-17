@@ -1,11 +1,13 @@
 # build
 cargo build
 
-# Generation of ArtTs file.
-protoc -I /usr/local/include -I /Users/bytedance/work/protoc-gen-arkts/tests --arkts_out=/Users/bytedance/work/protoc-gen-arkts/tests /Users/bytedance/work/protoc-gen-arkts/tests/gen.proto  --plugin=./target/debug/protoc-gen-arkts --arkts_opt=with_sendable=true
-protoc -I /usr/local/include -I /Users/bytedance/work/protoc-gen-arkts/tests --arkts_out=/Users/bytedance/work/protoc-gen-arkts/tests /Users/bytedance/work/protoc-gen-arkts/tests/common.proto  --plugin=./target/debug/protoc-gen-arkts --arkts_opt=with_sendable=true
-protoc -I /usr/local/include -I /Users/bytedance/work/protoc-gen-arkts/tests --arkts_out=/Users/bytedance/work/protoc-gen-arkts/tests /Users/bytedance/work/protoc-gen-arkts/tests/enum.proto  --plugin=./target/debug/protoc-gen-arkts --arkts_opt=with_sendable=true
+# Generation of ArkTS file.
+# Add current target/debug to the front of PATH so protoc finds the local build first
+export PATH=$(pwd)/target/debug:$PATH
 
-# Test generated ArtTs file.
+protoc -I /usr/local/include -I ./tests --arkts_out=./tests ./tests/gen.proto --arkts_opt=with_sendable=true
+protoc -I /usr/local/include -I ./tests --arkts_out=./tests ./tests/common.proto --arkts_opt=with_sendable=true
+protoc -I /usr/local/include -I ./tests --arkts_out=./tests ./tests/enum.proto --arkts_opt=with_sendable=true
+
+# Test generated ArkTS file.
 # Wait till we get an ArkTs runtime from Huawei.
-#

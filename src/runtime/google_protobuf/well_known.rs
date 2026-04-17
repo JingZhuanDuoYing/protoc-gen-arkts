@@ -30,5 +30,3 @@ impl<'a, 'b> VisitMut for LazyTypeRefWkt<'a, 'b> {
     }
 }
 
-include!(concat!(env!("OUT_DIR"), "/wkt/mod.rs"));
-
