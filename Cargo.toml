@@ -1,6 +1,6 @@
 [package]
 name = "protoc_gen_arkts"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["xingxing <wanglijie.skin@bytedance.com>"]
 edition = "2021"
 
