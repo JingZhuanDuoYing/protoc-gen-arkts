@@ -224,13 +224,22 @@ impl GooglePBRuntime {
             }
 
             if prevent_defaults {
-                stmts.push(crate::if_stmt!(
-                    field.default_value_bin_expr(ctx, accessor),
-                    Stmt::Block(BlockStmt {
+                if let Stmt::Expr(expr_stmt) = &field_stmt {
+                    stmts.push(crate::expr_stmt!(Expr::Bin(swc_ecma_ast::BinExpr {
                         span: DUMMY_SP,
-                        stmts: vec![field_stmt]
-                    })
-                ));
+                        op: swc_ecma_ast::BinaryOp::LogicalAnd,
+                        left: Box::new(field.default_value_bin_expr(ctx, accessor)),
+                        right: expr_stmt.expr.clone(),
+                    })));
+                } else {
+                    stmts.push(crate::if_stmt!(
+                        field.default_value_bin_expr(ctx, accessor),
+                        Stmt::Block(BlockStmt {
+                            span: DUMMY_SP,
+                            stmts: vec![field_stmt]
+                        })
+                    ));
+                }
             } else {
                 stmts.push(field_stmt);
             }

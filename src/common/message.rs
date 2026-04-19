@@ -230,7 +230,7 @@ where
 
         let mut members: Vec<ClassMember> = Vec::new();
 
-        members.push(self.print_message_type(ctx));
+        // members.push(self.print_message_type(ctx));
         // members.push(self.print_unknown_fields());
 
         for member in self.field.clone() {
