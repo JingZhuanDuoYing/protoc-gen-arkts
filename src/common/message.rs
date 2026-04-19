@@ -96,6 +96,47 @@ impl DescriptorProto {
         })
     }
 
+    fn print_to_binary(&self, _ctx: &mut Context) -> ClassMember {
+        let statements = vec![
+            Stmt::Decl(crate::const_decl!(
+                "bw: BinaryWriter",
+                crate::new_expr!(Expr::Ident(quote_ident!("BinaryWriter")))
+            )),
+            crate::expr_stmt!(crate::call_expr!(
+                crate::member_expr!("this", "serializeInternal"),
+                vec![crate::expr_or_spread!(quote_ident!("bw").into())]
+            )),
+            crate::return_stmt!(crate::call_expr!(crate::member_expr!(
+                "bw",
+                "getResultBuffer"
+            ))),
+        ];
+
+        ClassMember::Method(ClassMethod {
+            span: DUMMY_SP,
+            accessibility: None,
+            key: PropName::Ident(quote_ident!("toBinary")),
+            is_abstract: false,
+            is_optional: false,
+            is_override: false,
+            is_static: false,
+            function: Box::new(Function {
+                body: Some(BlockStmt {
+                    span: DUMMY_SP,
+                    stmts: statements,
+                }),
+                decorators: vec![],
+                is_async: false,
+                is_generator: false,
+                params: vec![],
+                return_type: Some(Box::new(crate::type_annotation!("Uint8Array"))),
+                span: DUMMY_SP,
+                type_params: None,
+            }),
+            kind: MethodKind::Method,
+        })
+    }
+
     fn print_deserialize(&self, ctx: &mut Context) -> ClassMember {
         let statements = vec![
             Stmt::Decl(crate::const_decl!(
@@ -204,6 +245,7 @@ where
         members.push(self.print_merge_from(ctx, runtime));
         members.push(self.print_deserialize(ctx));
         members.push(self.print_serialize(ctx, runtime));
+        members.push(self.print_to_binary(ctx));
 
         let mut decorators = Vec::new();
         if ctx.options.with_sendable {
