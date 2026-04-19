@@ -91,46 +91,45 @@ message Struct2 {
 
 
 ```arkts
- const struct_impl = new struct_pkg_Struct()
-    struct_impl.field_string = "field string"
-    struct_impl.field_string_list = ["field string list1", "field string list2"]
-    struct_impl.field_i32 = 100
-    struct_impl.field_i32_list = [1, 2, 3]
-    struct_impl.field_i64 = BigInt(10)
-    struct_impl.field_i64_list = [BigInt(1), BigInt(2), BigInt(3), BigInt(4), BigInt(5)]
-    struct_impl.field_boolean = false
-    struct_impl.field_boolean_list = [false, true, false, true]
-    struct_impl.field_bytes = new Uint8Array(10)
-    struct_impl.field_bytes.set([96, 97])
-    struct_impl.field_bytes_list = []
-    struct_impl.field_bytes_list.push(struct_impl.field_bytes)
-    struct_impl.field_enum = struct_pkg_Enum.ENUM_1
-    struct_impl.field_enum_list = [struct_pkg_Enum.ENUM_1, struct_pkg_Enum.ENUM_1]
+const struct_impl = new struct_pkg_Struct()
+struct_impl.field_string = "field string"
+struct_impl.field_string_list = ["field string list1", "field string list2"]
+struct_impl.field_i32 = 100
+struct_impl.field_i32_list = [1, 2, 3]
+struct_impl.field_i64 = BigInt(10)
+struct_impl.field_i64_list = [BigInt(1), BigInt(2), BigInt(3), BigInt(4), BigInt(5)]
+struct_impl.field_boolean = false
+struct_impl.field_boolean_list = [false, true, false, true]
+struct_impl.field_bytes = new Uint8Array(10)
+struct_impl.field_bytes.set([96, 97])
+struct_impl.field_bytes_list = []
+struct_impl.field_bytes_list.push(struct_impl.field_bytes)
+struct_impl.field_enum = struct_pkg_Enum.ENUM_1
+struct_impl.field_enum_list = [struct_pkg_Enum.ENUM_1, struct_pkg_Enum.ENUM_1]
 
-    const common_impl = new struct_pkg_Common()
-    common_impl.common_id = "id"
-    common_impl.common_type = BigInt(100)
-    const common_impl1 = new struct_pkg_Common()
-    common_impl1.common_id = "id"
-    common_impl1.common_type = BigInt(100)
-    struct_impl.field_common_struct = common_impl
-    struct_impl.field_common_struct_list = [common_impl, common_impl1]
-    struct_impl.field_map_string_string = new Map<string, string>()
-    struct_impl.field_map_string_i32 = new Map<string, number>()
-    struct_impl.field_map_i64_i64 = new Map<bigint, bigint>()
-    struct_impl.field_map_i64_string = new Map<bigint, string>()
-    for (let i = 0; i < 10; ++i ) {
-      struct_impl.field_map_string_string.set(i.toString(), i.toString())
-      struct_impl.field_map_string_i32.set(i.toString(), i)
-      struct_impl.field_map_i64_i64.set(BigInt(i), BigInt(i))
-      struct_impl.field_map_i64_string.set(BigInt(i), i.toString())
-    }
+const common_impl = new struct_pkg_Common()
+common_impl.common_id = "id"
+common_impl.common_type = BigInt(100)
+const common_impl1 = new struct_pkg_Common()
+common_impl1.common_id = "id"
+common_impl1.common_type = BigInt(100)
+struct_impl.field_common_struct = common_impl
+struct_impl.field_common_struct_list = [common_impl, common_impl1]
+struct_impl.field_map_string_string = new Map<string, string>()
+struct_impl.field_map_string_i32 = new Map<string, number>()
+struct_impl.field_map_i64_i64 = new Map<bigint, bigint>()
+struct_impl.field_map_i64_string = new Map<bigint, string>()
+for (let i = 0; i < 10; ++i ) {
+  struct_impl.field_map_string_string.set(i.toString(), i.toString())
+  struct_impl.field_map_string_i32.set(i.toString(), i)
+  struct_impl.field_map_i64_i64.set(BigInt(i), BigInt(i))
+  struct_impl.field_map_i64_string.set(BigInt(i), i.toString())
+}
 
-    // to binary & from binary
-    const new_to_binary_buf = struct_impl.toBinary()
-    const new_from_binary_struct = struct_pkg_Struct.fromBinary(new_to_binary_buf)
-
-    ```
+// to binary & from binary
+const new_to_binary_buf = struct_impl.toBinary()
+const new_from_binary_struct = struct_pkg_Struct.fromBinary(new_to_binary_buf)
+```
 
 ## Development
 
