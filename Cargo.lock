@@ -680,7 +680,7 @@ dependencies = [
 
 [[package]]
 name = "protoc_gen_arkts"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "anyhow",
  "cfg-if",

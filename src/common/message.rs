@@ -69,7 +69,7 @@ impl DescriptorProto {
 
         ClassMember::Method(ClassMethod {
             span: DUMMY_SP,
-            accessibility: Some(swc_ecma_ast::Accessibility::Protected),
+            accessibility: None,
             key: PropName::Ident(quote_ident!("serializeInternal")),
             is_abstract: false,
             is_optional: false,
