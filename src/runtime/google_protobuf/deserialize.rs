@@ -79,25 +79,37 @@ impl GooglePBRuntime {
 
     fn deserialize_primitive_field_expr(
         &self,
-        ctx: &mut Context,
         field: &descriptor::FieldDescriptorProto,
-        force_unpacked: bool,
+        packed: bool,
     ) -> Expr {
         let mut call = crate::call_expr!(crate::member_expr!(
             "br",
-            self.rw_function_name("read", ctx, field)
+            self.rw_function_name_for_encoding("read", field, packed)
         ));
-        if (field.is_packed(ctx) || field.is_packable()) && !force_unpacked {
-            let mut covert_type = "";
-            if self.decoder_fn_name(field) == "readSignedVarint32" || self.decoder_fn_name(field) == "readDouble" {
-                covert_type = "as number";
-            }
-            call = crate::new_expr!(
-                Expr::Ident(
-                    quote_ident!(format!("br.decoder_.{}() {}",
-                    self.decoder_fn_name(field), covert_type))))
-        }
-        if field.is_bigint() {
+        if packed && field.is_bigint() {
+            call = crate::call_expr!(
+                crate::member_expr_bare!(call, "map"),
+                vec![crate::expr_or_spread!(crate::arrow_func_short!(
+                    crate::call_expr!(
+                        quote_ident!("BigInt").into(),
+                        vec![crate::expr_or_spread!(quote_ident!("r").into())]
+                    ),
+                    vec![crate::pat_ident!(quote_ident!("r: string"))]
+                ))]
+            );
+        } else if packed && field.is_booelan() {
+            call = crate::call_expr!(
+                crate::member_expr_bare!(call, "map"),
+                vec![crate::expr_or_spread!(crate::arrow_func_short!(
+                    crate::bin_expr!(
+                        Expr::Ident(quote_ident!("r")),
+                        crate::lit_num!(0).into(),
+                        BinaryOp::NotEqEq
+                    ),
+                    vec![crate::pat_ident!(quote_ident!("r: number"))]
+                ))]
+            );
+        } else if field.is_bigint() {
             call = crate::call_expr!(
                 quote_ident!("BigInt").into(),
                 vec![crate::expr_or_spread!(call)]
@@ -106,23 +118,6 @@ impl GooglePBRuntime {
             call = crate::bin_expr!(call, crate::lit_num!(0).into(), BinaryOp::ZeroFillRShift)
         } else if field.is_booelan() {
             call = crate::bin_expr!(call, crate::lit_num!(0).into(), BinaryOp::NotEqEq)
-        }
-        if (field.is_packed(ctx) || field.is_packable()) && !force_unpacked {
-            let mut call_expr = crate::call_expr!(
-                crate::member_expr!("br", self.rw_function_name("read", ctx, field)),
-                vec![]
-            );
-
-            if field.type_() == field_descriptor_proto::Type::TYPE_BOOL {
-                call_expr = crate::call_expr!(
-                    crate::member_expr_bare!(call_expr.into(), "map"),
-                    vec![crate::expr_or_spread!(crate::arrow_func_short!(
-                        crate::bin_expr!(Expr::Ident(quote_ident!("r")), crate::lit_num!(0).into(), BinaryOp::NotEqEq),
-                        vec![crate::pat_ident!(quote_ident!(format!("{}: {}", "r", "number")))]
-                    ))]
-                )
-            } 
-            call = call_expr
         }
         call
     }
@@ -181,14 +176,14 @@ impl GooglePBRuntime {
         ctx: &mut Context,
         field: &descriptor::FieldDescriptorProto,
         accessor: field::FieldAccessorFn,
-        force_unpacked: bool,
+        packed: bool,
     ) -> Expr {
         if field.is_map(ctx) {
             self.deserialize_map_field_expr(ctx, field, accessor)
         } else if field.is_message() {
             self.deserialize_message_field_expr(ctx, field, accessor)
         } else {
-            self.deserialize_primitive_field_expr(ctx, field, force_unpacked)
+            self.deserialize_primitive_field_expr(field, packed)
         }
     }
 
@@ -214,24 +209,23 @@ impl GooglePBRuntime {
             } else if field.is_message() && !field.is_repeated() {
                 crate::expr_stmt!(read_expr)
             } else if field.is_packable() {
-                let mut field_expr = self.deserialize_field_expr(ctx, field, accessor, false);
-                if field.is_repeated() && ctx.options.with_sendable  {
-                    field_expr = crate::call_expr!(crate::member_expr_bare!(crate::member_expr!("collections", "Array"), "from"), 
-                        vec![
-                            crate::expr_or_spread!(field_expr)
-                        ]
-                    )
-                }
+                let field_expr = self.deserialize_field_expr(ctx, field, accessor, true);
                 crate::if_stmt!(
                     crate::call_expr!(crate::member_expr!("br", "isDelimited")),
-                    crate::expr_stmt!(crate::assign_expr!(
-                        PatOrExpr::Expr(Box::new(accessor(field))),
-                        field_expr
+                    crate::expr_stmt!(crate::call_expr!(
+                        crate::member_expr_bare!(
+                            crate::member_expr!("this", format!("{}?", field.name())),
+                            "push"
+                        ),
+                        vec![crate::expr_or_spread!(field_expr, true)]
                     )),
                     crate::expr_stmt!(crate::call_expr!(
-                        crate::member_expr_bare!(crate::member_expr!("this", format!("{}?", field.name())), "push"),
+                        crate::member_expr_bare!(
+                            crate::member_expr!("this", format!("{}?", field.name())),
+                            "push"
+                        ),
                         vec![crate::expr_or_spread!(
-                            self.deserialize_field_expr(ctx, field, accessor, true)
+                            self.deserialize_field_expr(ctx, field, accessor, false)
                         )]
                     ))
                 )
@@ -317,5 +311,95 @@ impl GooglePBRuntime {
                 stmts: vec![switch_stmt],
             })),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        context::Syntax,
+        descriptor::{
+            field_descriptor_proto::{Label, Type},
+            DescriptorProto, FieldDescriptorProto, FieldOptions,
+        },
+        emit::emit,
+        options::Options,
+    };
+    use protobuf::MessageField;
+    use swc_ecma_ast::ModuleItem;
+
+    fn render_repeated_field(field_type: Type, syntax: Syntax, packed: Option<bool>) -> String {
+        let mut field = FieldDescriptorProto::new();
+        field.set_name("values".to_string());
+        field.set_number(1);
+        field.set_label(Label::LABEL_REPEATED);
+        field.set_type(field_type);
+
+        if let Some(packed) = packed {
+            let mut options = FieldOptions::new();
+            options.set_packed(packed);
+            field.options = MessageField::some(options);
+        }
+
+        let mut descriptor = DescriptorProto::new();
+        descriptor.field.push(field);
+
+        let options = Options::parse("with_sendable=false");
+        let mut ctx = Context::new(&options, &syntax);
+        let stmt = GooglePBRuntime::new().deserialize_stmt(
+            &mut ctx,
+            &descriptor,
+            field::this_field_member,
+            true,
+        );
+
+        emit(vec![ModuleItem::Stmt(stmt)])
+    }
+
+    #[test]
+    fn repeated_double_uses_observed_wire_type_for_all_packing_defaults() {
+        for generated in [
+            render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto2, None),
+            render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto2, Some(true)),
+            render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto3, None),
+            render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto3, Some(false)),
+        ] {
+            assert!(
+                generated
+                    .contains("if (br.isDelimited()) this.values?.push(...br.readPackedDouble())"),
+                "generated packed branch did not append packed values:\n{generated}"
+            );
+            assert!(
+                generated.contains("else this.values?.push(br.readDouble())"),
+                "generated unpacked branch did not read a scalar value:\n{generated}"
+            );
+        }
+    }
+
+    #[test]
+    fn packed_bigint_and_bool_values_are_converted_before_appending() {
+        let bigint = render_repeated_field(Type::TYPE_INT64, Syntax::Proto3, None);
+        assert!(
+            bigint.contains(
+                "this.values?.push(...br.readPackedInt64String().map((r: string)=>BigInt(r)))"
+            ),
+            "generated packed bigint branch did not convert every value:\n{bigint}"
+        );
+        assert!(
+            bigint.contains("else this.values?.push(BigInt(br.readInt64String()))"),
+            "generated unpacked bigint branch did not convert the scalar value:\n{bigint}"
+        );
+
+        let boolean = render_repeated_field(Type::TYPE_BOOL, Syntax::Proto3, None);
+        assert!(
+            boolean
+                .contains("this.values?.push(...br.readPackedInt64().map((r: number)=>r !== 0))"),
+            "generated packed bool branch did not convert every value:\n{boolean}"
+        );
+        assert!(
+            boolean.contains("else this.values?.push(br.readInt64() !== 0)"),
+            "generated unpacked bool branch did not convert the scalar value:\n{boolean}"
+        );
     }
 }
