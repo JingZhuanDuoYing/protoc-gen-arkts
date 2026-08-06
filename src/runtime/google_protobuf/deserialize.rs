@@ -14,7 +14,9 @@ use crate::{context::Context, descriptor};
 use std::vec;
 use swc_common::DUMMY_SP;
 use swc_ecma_ast::{
-    AssignOp, BinaryOp, BlockStmt, BreakStmt, Expr, PatOrExpr, Stmt, SwitchCase, SwitchStmt, ThrowStmt, TsNonNullExpr, WhileStmt,
+    AssignOp, BinaryOp, BlockStmt, BreakStmt, Expr, ParenExpr, PatOrExpr, Stmt, SwitchCase,
+    SwitchStmt, ThrowStmt, TsArrayType, TsAsExpr, TsKeywordType, TsKeywordTypeKind, TsNonNullExpr,
+    TsType, WhileStmt,
 };
 use swc_ecma_utils::{quote_ident, quote_str};
 
@@ -86,6 +88,27 @@ impl GooglePBRuntime {
             "br",
             self.rw_function_name_for_encoding("read", field, packed)
         ));
+        if packed {
+            let element_kind = if field.is_bigint() {
+                TsKeywordTypeKind::TsStringKeyword
+            } else {
+                TsKeywordTypeKind::TsNumberKeyword
+            };
+            call = Expr::Paren(ParenExpr {
+                span: DUMMY_SP,
+                expr: Box::new(Expr::TsAs(TsAsExpr {
+                    span: DUMMY_SP,
+                    expr: Box::new(call),
+                    type_ann: Box::new(TsType::TsArrayType(TsArrayType {
+                        span: DUMMY_SP,
+                        elem_type: Box::new(TsType::TsKeywordType(TsKeywordType {
+                            span: DUMMY_SP,
+                            kind: element_kind,
+                        })),
+                    })),
+                })),
+            });
+        }
         if packed && field.is_bigint() {
             call = crate::call_expr!(
                 crate::member_expr_bare!(call, "map"),
@@ -114,7 +137,7 @@ impl GooglePBRuntime {
                 quote_ident!("BigInt").into(),
                 vec![crate::expr_or_spread!(call)]
             );
-        } else if field.type_() == field_descriptor_proto::Type::TYPE_UINT32 {
+        } else if !packed && field.type_() == field_descriptor_proto::Type::TYPE_UINT32 {
             call = crate::bin_expr!(call, crate::lit_num!(0).into(), BinaryOp::ZeroFillRShift)
         } else if field.is_booelan() {
             call = crate::bin_expr!(call, crate::lit_num!(0).into(), BinaryOp::NotEqEq)
@@ -366,8 +389,9 @@ mod tests {
             render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto3, Some(false)),
         ] {
             assert!(
-                generated
-                    .contains("if (br.isDelimited()) this.values?.push(...br.readPackedDouble())"),
+                generated.contains(
+                    "if (br.isDelimited()) this.values?.push(...(br.readPackedDouble() as number[]))"
+                ),
                 "generated packed branch did not append packed values:\n{generated}"
             );
             assert!(
@@ -382,7 +406,7 @@ mod tests {
         let bigint = render_repeated_field(Type::TYPE_INT64, Syntax::Proto3, None);
         assert!(
             bigint.contains(
-                "this.values?.push(...br.readPackedInt64String().map((r: string)=>BigInt(r)))"
+                "this.values?.push(...(br.readPackedInt64String() as string[]).map((r: string)=>BigInt(r)))"
             ),
             "generated packed bigint branch did not convert every value:\n{bigint}"
         );
@@ -393,13 +417,56 @@ mod tests {
 
         let boolean = render_repeated_field(Type::TYPE_BOOL, Syntax::Proto3, None);
         assert!(
-            boolean
-                .contains("this.values?.push(...br.readPackedInt64().map((r: number)=>r !== 0))"),
+            boolean.contains(
+                "this.values?.push(...(br.readPackedInt64() as number[]).map((r: number)=>r !== 0))"
+            ),
             "generated packed bool branch did not convert every value:\n{boolean}"
         );
         assert!(
             boolean.contains("else this.values?.push(br.readInt64() !== 0)"),
             "generated unpacked bool branch did not convert the scalar value:\n{boolean}"
+        );
+    }
+
+    #[test]
+    fn packed_reader_results_are_typed_as_arrays_before_spreading() {
+        let number = render_repeated_field(Type::TYPE_DOUBLE, Syntax::Proto3, None);
+        assert!(
+            number.contains("this.values?.push(...(br.readPackedDouble() as number[]))"),
+            "generated packed number branch did not type the reader result as an array:\n{number}"
+        );
+
+        let bigint = render_repeated_field(Type::TYPE_INT64, Syntax::Proto3, None);
+        assert!(
+            bigint.contains(
+                "this.values?.push(...(br.readPackedInt64String() as string[]).map((r: string)=>BigInt(r)))"
+            ),
+            "generated packed bigint branch did not type the reader result as an array:\n{bigint}"
+        );
+
+        let boolean = render_repeated_field(Type::TYPE_BOOL, Syntax::Proto3, None);
+        assert!(
+            boolean.contains(
+                "this.values?.push(...(br.readPackedInt64() as number[]).map((r: number)=>r !== 0))"
+            ),
+            "generated packed bool branch did not type the reader result as an array:\n{boolean}"
+        );
+    }
+
+    #[test]
+    fn repeated_uint32_normalizes_only_unpacked_values() {
+        let generated = render_repeated_field(Type::TYPE_UINT32, Syntax::Proto3, None);
+        assert!(
+            generated.contains("this.values?.push(...(br.readPackedUint32() as number[]))"),
+            "generated packed uint32 branch did not append the packed array:\n{generated}"
+        );
+        assert!(
+            generated.contains("else this.values?.push(br.readUint32() >>> 0)"),
+            "generated unpacked uint32 branch did not normalize the scalar value:\n{generated}"
+        );
+        assert!(
+            !generated.contains("readPackedUint32() >>> 0"),
+            "generated packed uint32 branch normalized the array as a scalar:\n{generated}"
         );
     }
 }
